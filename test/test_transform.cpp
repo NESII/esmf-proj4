@@ -274,6 +274,31 @@ void test_Coordinates_transformTo(){
     assertVectorEqual(p_values, values_actual, td.p_coords->getSize(), __LINE__);
 };
 
+void test_Coordinates_transformTo_rotated_pole(){
+    int size = 4;
+    double values[] = {-25.075000762939453, -20.075000762939453, -24.96500015258789, -19.96500015258789};
+    double values_actual[] = {-8.33782, 26.2072, -8.27533, 26.3473};
+    string proj_dest = "+proj=ob_tran +o_proj=latlon +o_lon_p=-162.0 +o_lat_p=39.25 +lon_0=180 +ellps=sphere";
+
+    // Convert the coordinate values to radians.
+    for (int i = 0; i < size; i++){
+        values[i] *= DEG_TO_RAD;
+    }
+    CoordinateSystem cs_src(PROJ_SPHERICAL);
+    CoordinateIndex ci(0, 1, -1);
+    Coordinates coords(values, 4, ci, cs_src);
+
+    CoordinateSystem cs_dest(proj_dest);
+
+    coords.transformTo(cs_dest);
+    double *new_values = coords.getValuesPtr();
+    // Convert the coordinate values back to degrees.
+    for (int i = 0; i < size; i++){
+        new_values[i] *= RAD_TO_DEG;
+    }
+    assertVectorEqual(new_values, values_actual, size);
+};
+
 void test_Coordinates_transformTo_various_transformations() {
     int size = 8;
     int ndim = 2;
@@ -587,6 +612,7 @@ int main(int argc, char** argv) {
     runTest(&test_Coordinates_transformTo_bigger_arrays, "test_Coordinates_transformTo_bigger_arrays");
     runTest(&test_Coordinates_transformTo_edge_effects, "test_Coordinates_transformTo_edge_effects");
     runTest(&test_Coordinates_transformTo_edge_effects_wrapped, "test_Coordinates_transformTo_edge_effects_wrapped");
+    runTest(&test_Coordinates_transformTo_rotated_pole, "test_Coordinates_transformTo_rotated_pole");
     runTest(&test_Coordinates_transformTo_three_dimensions, "test_Coordinates_transformTo_three_dimensions");
     runTest(&test_Coordinates_transformTo_update_wrapped_state, "test_Coordinates_transformTo_update_wrapped_state");
     runTest(&test_Coordinates_transformTo_various_transformations,
